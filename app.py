@@ -20,14 +20,6 @@ def load_and_fit_preprocessor(file_path):
     scaler = StandardScaler()
     scaler.fit(housing_df)
 
-st.title("House Price Prediction App")
-
-st.divider()
-
-st.write("The app uses machine learning for predicting house price with the given features of the house.")
-
-st.divider()
-
 def user_input_features():
     inputs = {
         'SqFtTotLiving' = st.sidebar.number_input('Total Living Area (SqFt)', 0, 20000, 1500),
@@ -58,8 +50,17 @@ input_df = user_input_features()
 st.write('### User Inputs')
 
 
-hgbr_model, kn_model, lgbm_model, xgb_model = load_model()
+models = load_model()
 scaler = load_and_fit_preprocessor('data/transformed/new_housing_dataset.csv')
+
+
+st.title("House Price Prediction App")
+
+st.divider()
+
+st.write("The app uses machine learning for predicting house price with the given features of the house.")
+
+st.divider()
 
 #collect user input
 st.sidebar.header('User Input')
@@ -67,3 +68,19 @@ input_df = user_input_features()
 
 #display user inputs
 st.write('### User Inputs')
+
+for key, value in input_df.iloc[0].items():
+    st.write(f'**{key}**: {value}')
+
+model_choice = st.sidebar.selectbox('Choose Model 🤖', list(models.keys()))
+selected_model = models[model_choice]
+st.write(f'### Selected model: {model_choice}')
+
+#prediction button
+if st.button('Predict'):
+    try: 
+        result = make_prediction(selected_model, scaler, input_df)
+        st.success(f'You are {result}')
+
+    except Exception as e:
+        st.error(f'Error Occured during prediction. {e}\n Please contact support')
